@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Encrypt/Decrypt Document</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f2f2f2;
+        }
+        .container {
+            max-width: 800px;
+            margin: 40px auto;
+            padding: 20px;
+            background-color: #fff;
+            border: 1px solid #ddd;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        h1, h2 {
+            color: #333;
+            margin-bottom: 10px;
+        }
+        form {
+            margin-bottom: 20px;
+        }
+        label {
+            display: block;
+            margin-bottom: 10px;
+        }
+        input[type="file"] {
+            margin-bottom: 10px;
+        }
+        button[type="submit"] {
+            background-color: #4CAF50;
+            color: #fff;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        button[type="submit"]:hover {
+            background-color: #3e8e41;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Encrypt a Document</h1>
+        <form method="POST" action="/encrypt" enctype="multipart/form-data">
+            <label>Select file to encrypt:</label>
+            <input type="file" name="file" required>
+            <button type="submit">Encrypt</button>
+        </form>
+
+        <h2>Decrypt a Document</h2>
+        <form method="POST" action="/decrypt" enctype="multipart/form-data">
+            <label>Select encrypted file:</label>
+            <input type="file" name="file" required>
+            <br>
+            <label>Enter the key:</label>
+            <input type="text" name="key" required>
+            <br>
+            <button type="submit">Decrypt</button>
+        </form>
+    </div>
+</body>
+</html>
