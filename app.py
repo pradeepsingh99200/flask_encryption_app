@@ -4,6 +4,12 @@ import os
 
 app = Flask(__name__)
 
+# Ensure the directories exist
+ENCRYPTED_FOLDER = 'encrypted_file'
+DECRYPTED_FOLDER = 'decrypted_file'
+os.makedirs(ENCRYPTED_FOLDER, exist_ok=True)
+os.makedirs(DECRYPTED_FOLDER, exist_ok=True)
+
 # Function to generate and save the encryption key
 def generate_key():
     key = Fernet.generate_key()
@@ -42,7 +48,11 @@ def encrypt():
     encrypted_data = encrypt_file(file_data, key)
     
     # Save the encrypted file temporarily
-    encrypted_file_path = os.path.join('encrypted_file', f"{file.filename}.encrypted")
+    encrypted_file_path = os.path.join(ENCRYPTED_FOLDER, f"{file.filename}.encrypted")
+    
+    # Ensure the encrypted directory exists before writing
+    os.makedirs(os.path.dirname(encrypted_file_path), exist_ok=True)
+    
     with open(encrypted_file_path, 'wb') as encrypted_file:
         encrypted_file.write(encrypted_data)
     
@@ -57,7 +67,7 @@ def encrypt():
 # Route to download the encrypted file
 @app.route('/download/<filename>')
 def download(filename):
-    file_path = os.path.join('encrypted_file', filename)
+    file_path = os.path.join(ENCRYPTED_FOLDER, filename)
     return send_file(file_path, as_attachment=True)
 
 # Route to handle file decryption
@@ -81,7 +91,11 @@ def decrypt():
         return f"Invalid key or corrupted file: {str(e)}"
     
     # Save the decrypted file temporarily
-    decrypted_file_path = os.path.join('decrypted_file', file.filename.replace('.encrypted', ''))
+    decrypted_file_path = os.path.join(DECRYPTED_FOLDER, file.filename.replace('.encrypted', ''))
+    
+    # Ensure the decrypted directory exists before writing
+    os.makedirs(os.path.dirname(decrypted_file_path), exist_ok=True)
+    
     with open(decrypted_file_path, 'wb') as decrypted_file:
         decrypted_file.write(decrypted_data)
     
@@ -89,8 +103,4 @@ def decrypt():
     return send_file(decrypted_file_path, as_attachment=True)
 
 if __name__ == '__main__':
-    # # Create directories if not exist
-    # os.makedirs('encrypted_file', exist_ok=True)
-    # os.makedirs('decrypted_file', exist_ok=True)
-    
     app.run(debug=True)
