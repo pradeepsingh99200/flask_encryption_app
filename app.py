@@ -89,8 +89,8 @@ def decrypt():
     return send_file(decrypted_file_path, as_attachment=True)
 
 if __name__ == '__main__':
-    # Create directories if not exist
-    os.makedirs('encrypted_file', exist_ok=True)
-    os.makedirs('decrypted_file', exist_ok=True)
+    # # Create directories if not exist
+    # os.makedirs('encrypted_file', exist_ok=True)
+    # os.makedirs('decrypted_file', exist_ok=True)
     
     app.run(debug=True)
