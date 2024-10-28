@@ -27,9 +27,16 @@
         label {
             display: block;
             margin-bottom: 10px;
+            font-weight: bold;
         }
-        input[type="file"] {
+        input[type="file"],
+        input[type="text"],
+        select {
             margin-bottom: 10px;
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
         }
         button[type="submit"] {
             background-color: #4CAF50;
@@ -42,27 +49,156 @@
         button[type="submit"]:hover {
             background-color: #3e8e41;
         }
+        .company-select {
+            margin-bottom: 20px;
+        }
+        nav {
+            margin-bottom: 20px;
+        }
+        nav a {
+            margin-right: 15px;
+            text-decoration: none;
+            color: #333;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        table, th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+        th {
+            background-color: #f2f2f2;
+        }
     </style>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js" integrity="sha512-v2CJ7UaYy4JwqLDIrZUI/4hqeoQieOmAZNXBeQyjo21dadnwR+8ZaIJVT8EE2iyI61OV8e6M8PP2/4hpQINQ/g==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 </head>
 <body>
+
     <div class="container">
-        <h1>Encrypt a Document</h1>
-        <form method="POST" action="/encrypt" enctype="multipart/form-data">
-            <label>Select file to encrypt:</label>
-            <input type="file" name="file" required>
+        <nav>
+            <a href="{{ url_for('dashboard') }}">Home</a>
+            <a href="{{ url_for('logout') }}" onclick="return confirm('Are you sure?')" >Logout</a>
+        </nav>
+        
+        
+        <h1>Document Encryption and Decryption</h1>
+        <!-- Display user name if logged in -->
+        {% if username %}
+            <h2>Welcome, {{ username }}!</h2>  <!-- Display user's name -->
+        {% endif %}    
+
+        <!-- Company Selection -->
+        <div class="company-select">
+            <h2>Select a Company</h2>
+            <select name="company" id="company">
+                {% if companies %}
+                    {% for company in companies %}
+                        <option value="{{ company['company_id'] }}">{{ company['company_name'] }}</option>
+                    {% endfor %}
+                {% else %}
+                    <option value="">No companies available</option>
+                {% endif %}
+            </select>
+        </div>
+
+        <div class="user-select">
+            <h2>Select a User</h2>
+            <select name="userEmails11" id="userEmails">
+                <option value="">Select a user</option>
+                <!-- User emails will be populated here -->
+            </select>
+        </div>
+
+        <!-- Encryption Form -->
+        <h2>Encrypt a Document</h2>
+        <form method="POST" action="/encrypt" enctype="multipart/form-data" id="encryptForm">
+            <label for="file">Select file to encrypt:</label>
+            <input type="file" name="file" id="file" required>
+        
+            <input type="hidden" name="receiver_id" id="userEmailsHidden"/>
+            <input type="text" name="email_id" id="user_email" placeholder="Receiver Email" readonly/>
             <button type="submit">Encrypt</button>
         </form>
 
-        <h2>Decrypt a Document</h2>
-        <form method="POST" action="/decrypt" enctype="multipart/form-data">
-            <label>Select encrypted file:</label>
-            <input type="file" name="file" required>
-            <br>
-            <label>Enter the key:</label>
-            <input type="text" name="key" required>
-            <br>
+
+        {% if uploads %}
+        <table>
+            <thead>
+                <tr>
+                    <th>Sr. No.</th>
+                    <th>Filename</th>
+                    <th>Receiver Email ID</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for file in uploads %}
+                <tr>
+                    <td>{{ loop.index }}</td>  <!-- loop.index provides a 1-based index -->
+                    <td>{{ file[1] }}</td>
+                    <td>{{ file[6] }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% endif %}
+
+        
+        <script>
+            $('#userEmails').change(function() {
+                // Get the selected user email
+                $('#userEmailsHidden').val($(this).val());
+                $('#user_email').val($( "#userEmails option:selected").text());
+            });
+        </script>
+
+        <!-- Decryption Form -->
+        <!-- <h2>Decrypt a Document</h2>
+        <form method="POST" action="/decrypt" enctype="multipart/form-data" id="decryptForm">
+            <label for="encryptedFile">Select encrypted file:</label>
+            <input type="file" name="file" id="encryptedFile" required>
+
+            <label for="key">Enter the key:</label>
+            <input type="text" name="key" id="key" required>
+
             <button type="submit">Decrypt</button>
-        </form>
+        </form> -->
     </div>
+
+    <script>
+        $('#company').change(function() {
+            var selectedValue = $(this).val();
+
+            if (selectedValue) {
+                $.ajax({
+                    url: '/proxy/getuserdata/' + selectedValue,  // Adjust this URL as necessary
+                    type: 'GET',
+                    success: function(data) {
+                        var userDropdown = $('#userEmails'); // Dropdown for user emails
+                        userDropdown.empty(); // Clear existing options
+                        
+                        // Check if data is in the expected format
+                        if (Array.isArray(data)) {
+                            data.forEach(function(user) {
+                                userDropdown.append(`<option value="${user.id}">${user.email}</option>`);
+                            });
+                        } else {
+                            userDropdown.append('<option value="">No users found</option>');
+                        }
+                    },
+                    error: function(jqXHR, textStatus, errorThrown) {
+                        console.error('Error fetching user data: ', textStatus, errorThrown);
+                    }
+                });
+            } else {
+                $('#userEmails').empty(); // Clear the user dropdown if no company is selected
+            }
+        });
+    </script>
+    
 </body>
 </html>

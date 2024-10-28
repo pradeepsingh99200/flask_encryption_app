@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Decrypt Document</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM" crossorigin="anonymous"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 0;
+        }
+        .container {
+            max-width: auto;
+            margin: 40px auto;
+            padding: 20px;
+            background-color: #fff;
+            border: 1px solid #ddd;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        h1 {
+            text-align: center;
+            color: #333;
+        }
+        label {
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        input[type="file"],
+        input[type="text"] {
+            margin-bottom: 15px;
+            padding: 10px;
+            width: 100%;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+        button[type="submit"] {
+            background-color: #4CAF50;
+            color: white;
+            padding: 10px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+        button[type="submit"]:hover {
+            background-color: #45a049;
+        }
+       
+        
+        .error {
+            color: red;
+            text-align: center;
+            margin-bottom: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+
+        <nav>
+            <!-- <a href="{{ url_for('index') }}">Home</a> -->
+            <a href="{{ url_for('logout') }}" onclick="return confirm('Are you sure?')" >Logout</a>
+        </nav>
+
+        <h1>Decrypt Document</h1>
+
+        <!-- Display user name if logged in -->
+        {% if username %}
+            <h2>Welcome, {{ username }}!</h2>  <!-- Display user's name -->
+        {% endif %} 
+
+        <!-- Display error message if any -->
+        {% with messages = get_flashed_messages(with_categories=true) %}
+          {% if messages %}
+            <div class="error">
+              {% for category, message in messages %}
+                {{ message }}
+              {% endfor %}
+            </div>
+          {% endif %}
+        {% endwith %}
+
+        <!-- Decryption Form -->
+        <form method="POST" action="/decrypt" enctype="multipart/form-data" id="decryptForm">
+            <label for="file">Select encrypted file:</label>
+            <input type="file" name="file" id="file" required>
+
+            <label for="key">Enter the encryption key:</label>
+            <input type="text" name="key" id="key" required>
+
+            <button type="submit">Decrypt</button>
+        </form>
+        <br/>
+        <!-- Table to display decrypted file details -->
+        {% if uploads %}
+        <table class="table table-bordered border-primary">
+            <thead>
+                <tr>
+                    <th>Sr. No.</th>
+                    <th>Filename</th>
+                    <th>Encrypted Key</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for file in uploads %}
+                <tr>
+                    <td>{{ loop.index }}</td> 
+                    <td>{{ file[1] }}</td>
+                    <td>{{ file[3] }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% endif %}
+    </div>
+</body>
+</html>
